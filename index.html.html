@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>PTTEP — Value Discovery Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#06111f;--navy2:#0d1f35;--navy3:#152d4a;
+  --teal:#00c9a7;--teal2:#00a388;--teal3:#007a66;
+  --gold:#f5a623;--gold2:#d48a00;
+  --blue:#4a7fe0;--red:#e05c5c;--purple:#8a5cf0;
+  --txt:#e8f0f8;--txt2:#8eaac8;--txt3:#4a6080;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);
+  --card:rgba(255,255,255,0.04);--card2:rgba(255,255,255,0.07);
+  --bg:#06111f;--sw:230px;--th:56px;
+}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;z-index:1000;background:var(--navy);display:flex;align-items:center;justify-content:center;transition:opacity .4s}
+.lb{position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 20% 80%,rgba(0,201,167,.12) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 80% 20%,rgba(74,127,224,.1) 0%,transparent 60%)}
+.lg{position:absolute;inset:0;background-image:linear-gradient(rgba(0,201,167,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,201,167,.04) 1px,transparent 1px);background-size:60px 60px}
+.lc{position:relative;z-index:1;background:rgba(255,255,255,.04);border:1px solid rgba(0,201,167,.2);border-radius:20px;padding:48px;width:420px;box-shadow:0 40px 80px rgba(0,0,0,.5)}
+.lm{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;background:linear-gradient(135deg,var(--teal),var(--blue));border-radius:14px;margin-bottom:12px;font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:#fff}
+.lt{text-align:center;margin-bottom:28px}
+.lt-s{font-size:11px;font-weight:600;letter-spacing:3px;color:var(--txt2);text-transform:uppercase}
+.lt-h{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--txt);margin-top:3px}
+.lf label{display:block;font-size:10px;font-weight:600;letter-spacing:1px;color:var(--txt2);text-transform:uppercase;margin-bottom:5px;margin-top:14px}
+.lf input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:12px 14px;font-size:14px;font-family:'Barlow',sans-serif;color:var(--txt);outline:none;transition:border-color .2s}
+.lf input:focus{border-color:var(--teal);background:rgba(0,201,167,.05)}
+.lf input::placeholder{color:var(--txt3)}
+.lb-btn{width:100%;margin-top:20px;background:linear-gradient(135deg,var(--teal),var(--teal2));border:none;border-radius:10px;padding:13px;font-family:'Barlow',sans-serif;font-size:14px;font-weight:600;color:#fff;cursor:pointer;transition:all .2s}
+.lb-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,201,167,.3)}
+.l-hint{text-align:center;margin-top:12px;font-size:11px;color:var(--txt3)}
+.l-hint span{color:var(--teal);cursor:pointer}
+.l-err{background:rgba(224,92,92,.12);border:1px solid rgba(224,92,92,.3);border-radius:8px;padding:9px 12px;font-size:12px;color:#f5a0a0;margin-bottom:10px;display:none}
+
+/* APP */
+#app{display:none;height:100vh}
+#app.on{display:block}
+
+/* SIDEBAR */
+.sb{position:fixed;left:0;top:0;bottom:0;width:var(--sw);background:var(--navy2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+.sb-logo{padding:18px 18px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo-m{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;color:#fff;flex-shrink:0}
+.logo-t{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--txt)}
+.logo-s{font-size:9px;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase}
+.ns{padding:14px 18px 4px;font-size:9px;letter-spacing:2px;color:var(--txt3);text-transform:uppercase;font-weight:600}
+.ni{display:flex;align-items:center;gap:10px;padding:8px 18px;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--txt2);transition:all .15s;border-left:2px solid transparent;margin:1px 8px 1px 0;border-radius:0 6px 6px 0}
+.ni:hover{background:rgba(255,255,255,.05);color:var(--txt)}
+.ni.on{background:rgba(0,201,167,.1);color:var(--teal);border-left-color:var(--teal)}
+.ni-ico{font-size:13px;width:16px;text-align:center;flex-shrink:0}
+.nb{margin-left:auto;background:rgba(0,201,167,.15);color:var(--teal);font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px}
+.sb-foot{padding:14px 18px;border-top:1px solid var(--border);margin-top:auto;flex-shrink:0}
+.uc{display:flex;align-items:center;gap:9px}
+.ua{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--teal3),var(--blue));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.un{font-size:12px;font-weight:600;color:var(--txt)}
+.ur{font-size:10px;color:var(--txt3)}
+.lo{margin-left:auto;background:none;border:none;color:var(--txt3);cursor:pointer;font-size:12px;padding:4px;transition:color .15s}
+.lo:hover{color:var(--red)}
+
+/* TOPBAR */
+.tb{position:fixed;left:var(--sw);right:0;top:0;height:var(--th);background:rgba(6,17,31,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 26px;z-index:90;justify-content:space-between}
+.tb-bc{font-size:10px;color:var(--txt3);letter-spacing:.5px}
+.tb-pt{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;color:var(--txt);letter-spacing:.3px}
+.tb-r{display:flex;align-items:center;gap:9px}
+.tp{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:500;color:var(--txt2)}
+.tp.a{background:rgba(0,201,167,.1);border-color:rgba(0,201,167,.25);color:var(--teal)}
+.tp.g{background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.25);color:var(--gold)}
+
+/* MAIN */
+.mc{margin-left:var(--sw);margin-top:var(--th);padding:26px 26px 40px;min-height:calc(100vh - var(--th));overflow-y:auto}
+.page{display:none}.page.on{display:block;animation:fsu .22s ease}
+@keyframes fsu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* KPI CARDS */
+.kr{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:20px}
+.kc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden}
+.kc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kc.t::after{background:linear-gradient(90deg,var(--teal),var(--teal2))}.kc.g::after{background:linear-gradient(90deg,var(--gold),var(--gold2))}.kc.b::after{background:linear-gradient(90deg,var(--blue),#2a5fd0)}.kc.r::after{background:linear-gradient(90deg,var(--red),#b83c3c)}.kc.p::after{background:linear-gradient(90deg,var(--purple),#6a3cd0)}
+.kl{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);font-weight:600;margin-bottom:7px}
+.kv{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:700;color:var(--txt);line-height:1}
+.ks{font-size:11px;color:var(--txt3);margin-top:4px}
+.kd{font-size:11px;font-weight:600;margin-top:4px}
+.kd.u{color:#00c9a7}.kd.u::before{content:'▲ '}.kd.d{color:#e05c5c}.kd.d::before{content:'▼ '}
+
+/* PANELS */
+.pn{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
+.pt{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--txt);letter-spacing:.3px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ps{font-family:'Barlow',sans-serif;font-size:11px;font-weight:400;color:var(--txt3);margin-left:auto}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;margin-bottom:15px}
+
+/* TABLES */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:rgba(255,255,255,.04);color:var(--txt3);font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border)}
+tbody td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--txt);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(255,255,255,.03)}
+
+/* BADGES */
+.bdg{display:inline-flex;align-items:center;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600}
+.hi{background:rgba(0,201,167,.15);color:#00c9a7}.med{background:rgba(245,166,35,.15);color:#f5a623}.lo{background:rgba(224,92,92,.15);color:#e05c5c}.gr{background:rgba(255,255,255,.08);color:var(--txt2)}.bl{background:rgba(74,127,224,.15);color:#7aa8f0}
+
+/* DROPDOWNS / FILTERS */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px;align-items:center}
+.filter-bar label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);font-weight:600;white-space:nowrap}
+.dd{background:rgba(255,255,255,.06);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;font-size:12px;font-family:'Barlow',sans-serif;color:var(--txt);cursor:pointer;outline:none;transition:border-color .15s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238eaac8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;padding-right:24px}
+.dd:focus{border-color:var(--teal)}
+.dd option{background:#0d1f35;color:var(--txt)}
+.flt{padding:5px 13px;border:1px solid var(--border);border-radius:20px;font-size:11px;font-weight:500;color:var(--txt2);cursor:pointer;background:transparent;transition:all .15s;font-family:'Barlow',sans-serif}
+.flt:hover{border-color:var(--border2);color:var(--txt)}
+.flt.on{background:rgba(0,201,167,.12);border-color:rgba(0,201,167,.35);color:var(--teal)}
+
+/* SEARCH INPUT */
+.srch{background:rgba(255,255,255,.06);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:12px;font-family:'Barlow',sans-serif;color:var(--txt);outline:none;transition:border-color .15s;width:200px}
+.srch:focus{border-color:var(--teal)}
+.srch::placeholder{color:var(--txt3)}
+
+/* GAUGES */
+.gg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.gc{text-align:center;padding:10px 6px}
+.gw{position:relative;width:80px;height:80px;margin:0 auto 7px}
+.gw svg{width:80px;height:80px}
+.gctr{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700}
+.gl{font-size:11px;color:var(--txt3);font-weight:500}
+.gr2{font-size:10px;font-weight:600;margin-top:2px}
+
+/* BULLET CHART */
+.bi{margin-bottom:11px}
+.bm{display:flex;justify-content:space-between;margin-bottom:4px}
+.bn{font-size:12px;font-weight:500;color:var(--txt)}
+.bf{font-size:10px;color:var(--txt3)}
+.bt{position:relative;background:rgba(255,255,255,.07);border-radius:4px;height:14px;overflow:hidden}
+.bfill{position:absolute;top:2px;bottom:2px;border-radius:3px;transition:width .5s ease}
+.btgt{position:absolute;top:0;bottom:0;width:2px;background:rgba(255,255,255,.65);z-index:2}
+.bv{display:flex;justify-content:space-between;margin-top:3px;font-size:10px;color:var(--txt3)}
+
+/* WORD CLOUD */
+.wc{display:flex;flex-wrap:wrap;gap:8px;padding:4px 0;align-items:center}
+.wt{padding:5px 12px;border-radius:20px;font-weight:500;cursor:pointer;transition:transform .15s;border:1px solid transparent}
+.wt:hover{transform:scale(1.06)}
+.wt.sel{box-shadow:0 0 0 2px var(--teal)}
+
+/* WATERFALL BARS */
+.wfr{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.wfl{width:130px;font-size:11px;color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.wftr{flex:1;background:rgba(255,255,255,.07);border-radius:4px;height:20px;overflow:hidden}
+.wff{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:600;color:#000;white-space:nowrap}
+.wfa{width:58px;text-align:right;font-size:11px;font-weight:600;color:var(--txt);flex-shrink:0}
+
+/* ESG BARS */
+.er{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.en{font-size:11px;color:var(--txt2);width:155px;flex-shrink:0}
+.et{flex:1;background:rgba(255,255,255,.07);border-radius:3px;height:8px}
+.ef{height:100%;border-radius:3px;transition:width .5s ease}
+.ev{width:28px;text-align:right;font-size:11px;font-weight:600;color:var(--txt);flex-shrink:0}
+
+/* CARDS GRID */
+.cg{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.ic{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s}
+.ic:hover{border-color:var(--border2);background:rgba(255,255,255,.09);transform:translateY(-1px)}
+.ic-t{font-size:12px;font-weight:700;color:var(--txt);margin-bottom:4px}
+.ic-d{font-size:11px;color:var(--txt3);line-height:1.5}
+
+/* VR HERO */
+.vr-hero{background:linear-gradient(135deg,rgba(0,201,167,.1) 0%,rgba(74,127,224,.07) 100%);border:1px solid rgba(0,201,167,.2);border-radius:16px;padding:26px;margin-bottom:18px}
+.vr-ht{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--txt);margin-bottom:5px}
+.vr-hs{font-size:13px;color:var(--txt2);max-width:600px}
+.vr-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:18px}
+.vr-st{text-align:center;padding:12px;background:rgba(0,0,0,.3);border-radius:10px;border:1px solid var(--border)}
+.vr-sn{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700}
+.vr-sl{font-size:10px;color:var(--txt3);margin-top:3px;letter-spacing:.5px;text-transform:uppercase}
+
+/* TIMELINE */
+.tl-row{display:flex;align-items:center;margin-bottom:5px}
+.tl-lbl{width:150px;flex-shrink:0;font-size:11px;color:var(--txt2);text-align:right;padding-right:12px}
+.tl-track{flex:1;background:rgba(255,255,255,.05);border-radius:5px;height:28px;position:relative}
+.tl-bar{position:absolute;height:100%;border-radius:5px;display:flex;align-items:center;padding-left:10px;font-size:10px;font-weight:600;color:rgba(0,0,0,.75)}
+
+/* ROADMAP */
+.rm-g{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.rm-c{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:15px}
+.rm-y{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;margin-bottom:8px}
+.rm-i{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:11px;color:var(--txt2)}
+.rm-d{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:3px}
+
+/* SLIDERS */
+.sl-row{display:flex;align-items:center;gap:12px;margin-bottom:11px}
+.sl-lbl{width:170px;font-size:12px;color:var(--txt2);flex-shrink:0}
+.sl-inp{flex:1;accent-color:var(--teal);cursor:pointer;height:4px}
+.sl-val{width:62px;font-size:12px;font-weight:600;color:var(--txt);text-align:right}
+.scen-btn{padding:5px 14px;border:1px solid var(--border);border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;background:transparent;color:var(--txt2);font-family:'Barlow',sans-serif;transition:all .15s}
+.scen-btn.on{background:rgba(0,201,167,.15);border-color:rgba(0,201,167,.4);color:var(--teal)}
+
+/* NPV RESULT BOX */
+.npv-box{margin-top:14px;background:rgba(0,201,167,.07);border:1px solid rgba(0,201,167,.2);border-radius:10px;padding:14px}
+.npv-lbl{font-size:10px;color:var(--txt3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px}
+.npv-val{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:700;color:var(--teal)}
+.npv-sub{font-size:11px;color:var(--txt3)}
+
+/* TOOLTIP */
+.tooltip-wrap{position:relative;display:inline-block}
+.tooltip-wrap .tip{visibility:hidden;background:rgba(13,31,53,.98);color:var(--txt);font-size:11px;border-radius:7px;padding:8px 11px;position:absolute;bottom:130%;left:50%;transform:translateX(-50%);white-space:nowrap;border:1px solid var(--border2);z-index:200;pointer-events:none;opacity:0;transition:opacity .15s}
+.tooltip-wrap:hover .tip{visibility:visible;opacity:1}
+
+/* OUTSIDE-IN COMPANY SELECTOR */
+.co-sel{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.co-chip{display:flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:11px;font-weight:500;color:var(--txt2);cursor:pointer;transition:all .15s}
+.co-chip:hover{border-color:var(--border2);color:var(--txt)}
+.co-chip.on{background:rgba(0,201,167,.12);border-color:rgba(0,201,167,.4);color:var(--teal)}
+.co-chip .dot{width:7px;height:7px;border-radius:50%;background:var(--teal)}
+
+/* IMPROVEMENTS BAR */
+.impr-row{display:flex;align-items:center;gap:12px;padding:10px;background:rgba(255,255,255,.03);border-radius:8px;margin-bottom:8px;border-left:3px solid}
+.impr-icon{font-size:18px;flex-shrink:0}
+.impr-text{font-size:12px;color:var(--txt2);flex:1}
+.impr-text strong{color:var(--txt);display:block;font-size:13px;margin-bottom:2px}
+.impr-impact{font-size:11px;font-weight:600;white-space:nowrap}
+
+/* SEARCH HIGHLIGHT */
+.hl{background:rgba(245,166,35,.3);border-radius:2px;padding:0 2px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="lb"></div><div class="lg"></div>
+  <div class="lc">
+    <div class="lt">
+      <div class="lm">P</div>
+      <div class="lt-s">Value Discovery Platform</div>
+      <div class="lt-h">PTTEP Analytics Suite</div>
+    </div>
+    <div class="l-err" id="lerr">Invalid credentials. Hint: <strong>admin / pttep2024</strong></div>
+    <div class="lf">
+      <label>Username</label>
+      <input type="text" id="lu" placeholder="Enter username" autocomplete="username">
+      <label>Password</label>
+      <input type="password" id="lp" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="lb-btn" onclick="doLogin()">Sign In →</button>
+    <div class="l-hint">Demo: <span onclick="document.getElementById('lu').value='admin';document.getElementById('lp').value='pttep2024'">click to autofill</span></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <nav class="sb">
+    <div class="sb-logo">
+      <div class="logo-m">P</div>
+      <div><div class="logo-t">PTTEP</div><div class="logo-s">Value Discovery</div></div>
+    </div>
+    <div class="ns">Overview</div>
+    <div class="ni on" data-pg="intro" onclick="nav(this)"><span class="ni-ico">⊞</span>Introduction</div>
+    <div class="ni" data-pg="comp" onclick="nav(this)"><span class="ni-ico">◈</span>Competitors</div>
+    <div class="ni" data-pg="outside" onclick="nav(this)"><span class="ni-ico">◎</span>Outside-In View</div>
+    <div class="ns">Discovery</div>
+    <div class="ni" data-pg="chal" onclick="nav(this)"><span class="ni-ico">⚑</span>Challenges</div>
+    <div class="ni" data-pg="kpi" onclick="nav(this)"><span class="ni-ico">▤</span>KPI Benchmarking</div>
+    <div class="ni" data-pg="opp" onclick="nav(this)"><span class="ni-ico">◆</span>Opportunities</div>
+    <div class="ns">Financials</div>
+    <div class="ni" data-pg="fin" onclick="nav(this)"><span class="ni-ico">$</span>Net Financials</div>
+    <div class="ni" data-pg="ice" onclick="nav(this)"><span class="ni-ico">▽</span>Iceberg View</div>
+    <div class="ni" data-pg="esg" onclick="nav(this)"><span class="ni-ico">♻</span>ESG Metrics</div>
+    <div class="ns">Strategy</div>
+    <div class="ni" data-pg="vr" onclick="nav(this)"><span class="ni-ico">✦</span>Value Realization<span class="nb">NEW</span></div>
+    <div class="ni" data-pg="impr" onclick="nav(this)"><span class="ni-ico">▲</span>Improvements<span class="nb">AI</span></div>
+    <div class="sb-foot">
+      <div class="uc">
+        <div class="ua" id="ua">A</div>
+        <div><div class="un" id="un">Admin</div><div class="ur">Strategy Analyst</div></div>
+        <button class="lo" onclick="doLogout()" title="Sign out">⏻</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- TOPBAR -->
+  <header class="tb">
+    <div><div class="tb-bc">PTTEP · Oil &amp; Gas Upstream</div><div class="tb-pt" id="pgtitle">Introduction</div></div>
+    <div class="tb-r">
+      <div class="tp">FY 2023 · Q4</div>
+      <div class="tp a">15 Peers</div>
+      <div class="tp g" id="case-pill">High Case</div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="mc">
+
+    <!-- INTRO -->
+    <div class="page on" id="pg-intro">
+      <div class="kr">
+        <div class="kc t"><div class="kl">Total Value Opportunity</div><div class="kv">$2.4B</div><div class="ks">5-year gross · high case</div><div class="kd u">18% vs baseline</div></div>
+        <div class="kc g"><div class="kl">Use Cases Identified</div><div class="kv">47</div><div class="ks">Across 8 departments</div><div class="kd u">12 new this cycle</div></div>
+        <div class="kc b"><div class="kl">Industry Peer Rank</div><div class="kv">#6</div><div class="ks">Out of 15 O&amp;G peers</div><div class="kd d">2 from last year</div></div>
+        <div class="kc r"><div class="kl">Pre-tax ROIC</div><div class="kv">14.2%</div><div class="ks">vs 11.8% industry avg</div><div class="kd u">Top quartile</div></div>
+      </div>
+      <div class="g2">
+        <div class="pn">
+          <div class="pt">Platform Navigator <span class="ps">Click any card to explore</span></div>
+          <div class="cg">
+            <div class="ic" onclick="nav(qni('outside'))"><div style="font-size:16px;margin-bottom:6px">◎</div><div class="ic-t">Value Insights</div><div class="ic-d">Financial &amp; sustainability vs peers</div></div>
+            <div class="ic" onclick="nav(qni('chal'))"><div style="font-size:16px;margin-bottom:6px">⚑</div><div class="ic-t">Pain Points</div><div class="ic-d">270 operational challenges by dept</div></div>
+            <div class="ic" onclick="nav(qni('kpi'))"><div style="font-size:16px;margin-bottom:6px">▤</div><div class="ic-t">KPI Benchmarks</div><div class="ic-d">522 AI benchmarks vs industry</div></div>
+            <div class="ic" onclick="nav(qni('opp'))"><div style="font-size:16px;margin-bottom:6px">◆</div><div class="ic-t">Opportunities</div><div class="ic-d">47 use cases &amp; value potential</div></div>
+            <div class="ic" onclick="nav(qni('fin'))"><div style="font-size:16px;margin-bottom:6px">$</div><div class="ic-t">Value Range</div><div class="ic-d">Net financial impact &amp; savings</div></div>
+            <div class="ic" onclick="nav(qni('vr'))"><div style="font-size:16px;margin-bottom:6px">✦</div><div class="ic-t">Realization</div><div class="ic-d">Roadmap, scenarios &amp; tracking</div></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:13px">
+          <div class="pn" style="flex:1">
+            <div class="pt">Mega Opportunity Areas</div>
+            <div id="mega-areas"></div>
+          </div>
+          <div class="pn">
+            <div class="pt">Value Mix by Domain</div>
+            <div style="position:relative;height:160px"><canvas id="c-donut" role="img" aria-label="Donut chart of value mix by domain">Value by domain</canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPETITORS -->
+    <div class="page" id="pg-comp">
+      <div class="kr">
+        <div class="kc t"><div class="kl">Peer Companies</div><div class="kv">15</div><div class="ks">O&amp;G Upstream globally</div></div>
+        <div class="kc b"><div class="kl">Countries</div><div class="kv">8</div><div class="ks">Asia, Americas, Europe</div></div>
+        <div class="kc g"><div class="kl">Avg Market Cap</div><div class="kv">$42B</div><div class="ks">Peer group median</div></div>
+        <div class="kc r"><div class="kl">PTTEP Cap Rank</div><div class="kv">#10</div><div class="ks">$20B market cap</div></div>
+      </div>
+      <div class="pn" style="margin-bottom:14px">
+        <div class="pt">Peer Overview <span class="ps">O&amp;G Upstream · FY2023</span></div>
+        <div class="filter-bar">
+          <label>Filter:</label>
+          <input class="srch" type="text" id="peer-srch" placeholder="Search company or HQ…" oninput="filterPeers()">
+          <select class="dd" id="peer-hq" onchange="filterPeers()">
+            <option value="">All Regions</option>
+            <option>Americas</option><option>Europe</option><option>Asia-Pacific</option>
+          </select>
+        </div>
+        <div class="tw"><table id="peer-tbl"><thead><tr><th>Company</th><th>HQ</th><th>Region</th><th>Mkt Cap</th><th onclick="sortPeers('trs')" style="cursor:pointer">1Y TRS ↕</th><th onclick="sortPeers('roic')" style="cursor:pointer">ROIC ↕</th><th>EBIT</th><th>ESG</th></tr></thead><tbody id="peer-body"></tbody></table></div>
+      </div>
+      <div class="pn">
+        <div class="pt">TRS vs ROIC Scatter <span class="ps">Bubble = market cap</span></div>
+        <div style="position:relative;height:260px"><canvas id="c-scatter" role="img" aria-label="Bubble chart of TRS versus ROIC for each peer company">Peer scatter chart</canvas></div>
+      </div>
+    </div>
+
+    <!-- OUTSIDE-IN -->
+    <div class="page" id="pg-outside">
+      <div class="pt" style="margin-bottom:12px">Select Company <span class="ps">Gauges update on selection</span></div>
+      <div class="co-sel" id="co-sel"></div>
+      <div class="g2">
+        <div class="pn">
+          <div class="pt">Financial Performance <span class="ps">vs 15 peers · percentile rank</span></div>
+          <div class="gg" id="fin-g"></div>
+        </div>
+        <div class="pn">
+          <div class="pt">ESG / Sustainability <span class="ps">ESGBook scores</span></div>
+          <div class="gg" id="esg-g"></div>
+        </div>
+      </div>
+      <div class="pn">
+        <div class="pt">Radar — vs Industry Average <span class="ps">Normalised 0–100</span></div>
+        <div style="position:relative;height:280px"><canvas id="c-radar" role="img" aria-label="Radar chart comparing selected company to industry average">Radar chart</canvas></div>
+      </div>
+    </div>
+
+    <!-- CHALLENGES -->
+    <div class="page" id="pg-chal">
+      <div class="g2" style="margin-bottom:14px">
+        <div class="pn">
+          <div class="pt">Pain Point Cloud <span class="ps">Click tag to filter cards below</span></div>
+          <div class="filter-bar">
+            <label>Department:</label>
+            <select class="dd" id="dept-dd" onchange="filterChal()">
+              <option value="">All Departments</option>
+              <option>Finance</option><option>Plant Maintenance</option><option>Supply Chain</option>
+              <option>Engineering &amp; Development</option><option>Downstream</option><option>HSE</option><option>IT</option>
+            </select>
+          </div>
+          <div class="wc" id="wc"></div>
+        </div>
+        <div class="pn">
+          <div class="pt">Issues by Department</div>
+          <div id="dept-bars"></div>
+        </div>
+      </div>
+      <div class="pn">
+        <div class="pt">Challenge Cards <span class="ps" id="chal-count">Showing all</span></div>
+        <div class="cg" id="chal-cards"></div>
+      </div>
+    </div>
+
+    <!-- KPI -->
+    <div class="page" id="pg-kpi">
+      <div class="pn">
+        <div class="pt">KPI Benchmarking — AI vs Industry <span class="ps">■ PTTEP | line = industry</span></div>
+        <div class="filter-bar">
+          <label>Process:</label>
+          <select class="dd" id="proc-dd" onchange="renderBullets()">
+            <option value="">All Functions</option>
+            <option>Finance</option><option>Operations</option><option>Supply Chain</option>
+            <option>Exploration</option><option>HSE</option><option>IT</option>
+          </select>
+          <label>Sub-Process:</label>
+          <select class="dd" id="subproc-dd" onchange="renderBullets()">
+            <option value="">All Sub-Processes</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" id="bullet-grid"></div>
+      </div>
+    </div>
+
+    <!-- OPPORTUNITIES -->
+    <div class="page" id="pg-opp">
+      <div class="pn" style="margin-bottom:14px">
+        <div class="pt">High Case 5-Year Value by Department <span class="ps" id="opp-case-lbl">High Case · $M</span></div>
+        <div class="filter-bar">
+          <label>Case:</label>
+          <button class="flt on" id="case-hi" onclick="setCase('hi')">High Case</button>
+          <button class="flt" id="case-med" onclick="setCase('med')">Median Case</button>
+          <button class="flt" id="case-lo" onclick="setCase('lo')">Low Case</button>
+        </div>
+        <div style="position:relative;height:260px"><canvas id="c-opp" role="img" aria-label="Bar chart of 5-year gross value by department">Opportunities chart</canvas></div>
+      </div>
+      <div class="pn">
+        <div class="pt">Use Case Register <span class="ps">47 total</span></div>
+        <div class="filter-bar">
+          <label>Dept:</label>
+          <select class="dd" id="uc-dept" onchange="renderUC()">
+            <option value="">All</option>
+            <option>Operations</option><option>Exploration</option><option>Drilling</option>
+            <option>Supply Chain</option><option>Finance</option><option>HSE</option><option>IT</option><option>HR</option>
+          </select>
+          <label>Type:</label>
+          <select class="dd" id="uc-type" onchange="renderUC()">
+            <option value="">All</option><option>Core</option><option>Add-On</option>
+          </select>
+          <label>Priority:</label>
+          <select class="dd" id="uc-pri" onchange="renderUC()">
+            <option value="">All</option><option>High</option><option>Medium</option><option>Low</option>
+          </select>
+          <input class="srch" type="text" id="uc-srch" placeholder="Search use cases…" oninput="renderUC()">
+        </div>
+        <div class="tw"><table id="uc-tbl"><thead><tr><th>Use Case</th><th>Department</th><th>Type</th><th>Low ($M)</th><th>Base ($M)</th><th>High ($M)</th><th>Priority</th></tr></thead><tbody id="uc-body"></tbody></table></div>
+        <div style="font-size:11px;color:var(--txt3);margin-top:8px" id="uc-count"></div>
+      </div>
+    </div>
+
+    <!-- NET FINANCIALS -->
+    <div class="page" id="pg-fin">
+      <div class="kr">
+        <div class="kc t"><div class="kl">Total Savings (5Y)</div><div class="kv">$890M</div><div class="ks">Net of implementation</div></div>
+        <div class="kc g"><div class="kl">Revenue Uplift (5Y)</div><div class="kv">$1.51B</div><div class="ks">High case scenario</div></div>
+        <div class="kc b"><div class="kl">Avg Payback</div><div class="kv">2.8Y</div><div class="ks">Core use cases</div></div>
+        <div class="kc r"><div class="kl">NPV (10%)</div><div class="kv">$1.1B</div><div class="ks">Base case</div></div>
+      </div>
+      <div class="g2">
+        <div class="pn">
+          <div class="pt">Cost Savings by Department</div>
+          <div id="sav-wf"></div>
+        </div>
+        <div class="pn">
+          <div class="pt">Cumulative Savings Trajectory</div>
+          <div style="position:relative;height:220px"><canvas id="c-sav" role="img" aria-label="Cumulative savings line chart">Savings chart</canvas></div>
+        </div>
+      </div>
+      <div class="pn">
+        <div class="pt">Scenario Comparison — 5-Year NPV ($M) <span class="ps">Core / Add-on filter active</span></div>
+        <div class="filter-bar">
+          <label>Type:</label>
+          <select class="dd" id="fin-type" onchange="rebuildScenChart()">
+            <option value="">All</option><option>Core</option><option>Add-On</option>
+          </select>
+        </div>
+        <div style="position:relative;height:220px"><canvas id="c-scen" role="img" aria-label="Scenario comparison bar chart">Scenario chart</canvas></div>
+      </div>
+    </div>
+
+    <!-- ICEBERG -->
+    <div class="page" id="pg-ice">
+      <div class="g2" style="margin-bottom:14px">
+        <div class="kc t" style="border-radius:14px"><div class="kl">AI Driven Value (Median)</div><div class="kv">$340M</div><div class="ks">Directly enabled by AI transformation</div></div>
+        <div class="kc b" style="border-radius:14px"><div class="kl">AI Enabled Value (Median)</div><div class="kv">$780M</div><div class="ks">Adjacent &amp; downstream value</div></div>
+      </div>
+      <div class="pn">
+        <div class="pt">The Iceberg Effect — AI Driven vs AI Enabled <span class="ps">$M by department</span></div>
+        <div class="filter-bar">
+          <label>View:</label>
+          <button class="flt on" id="ice-stacked" onclick="setIceMode('stacked',this)">Stacked</button>
+          <button class="flt" id="ice-grouped" onclick="setIceMode('grouped',this)">Grouped</button>
+        </div>
+        <div style="position:relative;height:300px"><canvas id="c-ice" role="img" aria-label="Iceberg AI driven vs AI enabled value chart">Iceberg chart</canvas></div>
+      </div>
+    </div>
+
+    <!-- ESG -->
+    <div class="page" id="pg-esg">
+      <div class="g3">
+        <div class="pn">
+          <div class="pt" style="color:#4caf7d">🌱 Environment</div>
+          <div style="text-align:center;margin-bottom:12px">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:46px;font-weight:700;color:#4caf7d">72</div>
+            <div style="font-size:11px;color:var(--txt3)">ESGBook Score · Rank 4/15</div>
+          </div>
+          <div id="env-b"></div>
+        </div>
+        <div class="pn">
+          <div class="pt" style="color:#5b8ef0">👥 Social</div>
+          <div style="text-align:center;margin-bottom:12px">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:46px;font-weight:700;color:#5b8ef0">65</div>
+            <div style="font-size:11px;color:var(--txt3)">ESGBook Score · Rank 7/15</div>
+          </div>
+          <div id="soc-b"></div>
+        </div>
+        <div class="pn">
+          <div class="pt" style="color:#a77de0">⚖️ Governance</div>
+          <div style="text-align:center;margin-bottom:12px">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:46px;font-weight:700;color:#a77de0">78</div>
+            <div style="font-size:11px;color:var(--txt3)">ESGBook Score · Rank 3/15</div>
+          </div>
+          <div id="gov-b"></div>
+        </div>
+      </div>
+      <div class="pn">
+        <div class="pt">ESG Scores — PTTEP vs Industry Avg <span class="ps">Source: ESGBook · Capital IQ</span></div>
+        <div style="position:relative;height:200px"><canvas id="c-esg" role="img" aria-label="ESG score comparison bar chart">ESG chart</canvas></div>
+      </div>
+    </div>
+
+    <!-- VALUE REALIZATION -->
+    <div class="page" id="pg-vr">
+      <div class="vr-hero">
+        <div class="vr-ht">✦ Value Realization Roadmap</div>
+        <div class="vr-hs">Translate identified opportunities into measurable, time-bound outcomes across a 5-year AI transformation horizon.</div>
+        <div class="vr-stats">
+          <div class="vr-st"><div class="vr-sn" style="color:var(--teal)">$2.4B</div><div class="vr-sl">Opportunity</div></div>
+          <div class="vr-st"><div class="vr-sn" style="color:var(--gold)">47</div><div class="vr-sl">Use Cases</div></div>
+          <div class="vr-st"><div class="vr-sn" style="color:var(--blue)">28%</div><div class="vr-sl">Realized YTD</div></div>
+          <div class="vr-st"><div class="vr-sn" style="color:var(--purple)">$672M</div><div class="vr-sl">Value Captured</div></div>
+          <div class="vr-st"><div class="vr-sn" style="color:var(--red)">2.8Y</div><div class="vr-sl">Avg Payback</div></div>
+        </div>
+      </div>
+      <div class="g2" style="margin-bottom:14px">
+        <div class="pn">
+          <div class="pt">Scenario Value Calculator</div>
+          <div style="display:flex;gap:8px;margin-bottom:14px">
+            <button class="scen-btn on" id="scen-base" onclick="setScen('base')">Base Case</button>
+            <button class="scen-btn" id="scen-hi" onclick="setScen('hi')">High Case</button>
+            <button class="scen-btn" id="scen-lo" onclick="setScen('lo')">Conservative</button>
+          </div>
+          <div id="sliders"></div>
+          <div class="npv-box">
+            <div class="npv-lbl">Modelled 5-Year NPV</div>
+            <div class="npv-val" id="npv-val">$1,100M</div>
+            <div class="npv-sub" id="npv-sub">Discounted at 10% · Base Case</div>
+          </div>
+        </div>
+        <div class="pn">
+          <div class="pt">Realization Progress by Wave</div>
+          <div style="position:relative;height:240px"><canvas id="c-vrp" role="img" aria-label="Realization progress bar chart by wave">Progress chart</canvas></div>
+        </div>
+      </div>
+      <div class="pn" style="margin-bottom:14px">
+        <div class="pt">Implementation Timeline <span class="ps">2024 – 2028 · AI transformation phases</span></div>
+        <div id="tl-wrap"></div>
+      </div>
+      <div class="pn">
+        <div class="pt">Annual Roadmap</div>
+        <div class="rm-g" id="rm-grid"></div>
+      </div>
+    </div>
+
+    <!-- IMPROVEMENTS -->
+    <div class="page" id="pg-impr">
+      <div class="kr">
+        <div class="kc t"><div class="kl">Quick Wins Available</div><div class="kv">12</div><div class="ks">&lt;6 months payback</div><div class="kd u">$380M combined</div></div>
+        <div class="kc g"><div class="kl">Gap vs Best-in-Class</div><div class="kv">$640M</div><div class="ks">Addressable performance gap</div><div class="kd d">Widening 8% YoY</div></div>
+        <div class="kc b"><div class="kl">AI Readiness Score</div><div class="kv">62%</div><div class="ks">Data &amp; infra maturity</div><div class="kd u">+7pp this year</div></div>
+        <div class="kc p"><div class="kl">Priority Actions</div><div class="kv">8</div><div class="ks">High-impact, low-effort</div><div class="kd u">Approved for 2024</div></div>
+      </div>
+      <div class="g2">
+        <div class="pn">
+          <div class="pt">Priority Improvement Areas <span class="ps">AI-identified · by potential impact</span></div>
+          <div class="filter-bar">
+            <label>Sort by:</label>
+            <select class="dd" id="impr-sort" onchange="renderImprovements()">
+              <option value="impact">Impact</option>
+              <option value="effort">Effort (Low→High)</option>
+              <option value="dept">Department</option>
+            </select>
+            <select class="dd" id="impr-dept" onchange="renderImprovements()">
+              <option value="">All Departments</option>
+              <option>Operations</option><option>Finance</option><option>Supply Chain</option><option>Exploration</option>
+            </select>
+          </div>
+          <div id="impr-list"></div>
+        </div>
+        <div class="pn">
+          <div class="pt">Effort vs Impact Matrix</div>
+          <div style="position:relative;height:300px"><canvas id="c-matrix" role="img" aria-label="Effort vs impact scatter chart of improvement opportunities">Effort-impact matrix</canvas></div>
+        </div>
+      </div>
+      <div class="pn">
+        <div class="pt">AI Readiness by Domain <span class="ps">Data availability · Process maturity · Tech stack</span></div>
+        <div style="position:relative;height:240px"><canvas id="c-ready" role="img" aria-label="AI readiness bar chart by domain">AI readiness chart</canvas></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+/* ========= AUTH ========= */
+const CREDS={admin:'pttep2024',analyst:'pttep2024',viewer:'pttep2024'};
+function doLogin(){
+  const u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value;
+  const err=document.getElementById('lerr');
+  if(CREDS[u]&&CREDS[u]===p){
+    const ls=document.getElementById('login-screen');
+    ls.style.opacity='0';
+    setTimeout(()=>{ls.style.display='none';const app=document.getElementById('app');app.classList.add('on');document.getElementById('ua').textContent=u[0].toUpperCase();document.getElementById('un').textContent=u.charAt(0).toUpperCase()+u.slice(1);if(!inited)init();},400);
+  }else{err.style.display='block';}
+}
+function doLogout(){document.getElementById('app').classList.remove('on');const ls=document.getElementById('login-screen');ls.style.display='flex';ls.style.opacity='1';document.getElementById('lp').value='';}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('login-screen').style.display!=='none')doLogin();});
+
+/* ========= NAV ========= */
+const pgTitles={intro:'Introduction',comp:'Competitors',outside:'Outside-In View',chal:'Challenges',kpi:'KPI Benchmarking',opp:'Opportunities',fin:'Net Financials',ice:'Iceberg View',esg:'ESG Metrics',vr:'Value Realization',impr:'Improvements'};
+function nav(el){
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  const pg=el.dataset.pg;
+  document.getElementById('pg-'+pg).classList.add('on');
+  document.getElementById('pgtitle').textContent=pgTitles[pg]||pg;
+}
+function qni(pg){return document.querySelector(`.ni[data-pg="${pg}"]`);}
+
+/* ========= DATA ========= */
+const PEERS=[
+  {name:'PTTEP',hq:'Thailand',region:'Asia-Pacific',cap:20,capLbl:'$20B',trs:12,roic:14.2,ebit:28,esg:72,you:true},
+  {name:'ConocoPhillips',hq:'USA',region:'Americas',cap:130,capLbl:'$130B',trs:8,roic:16.1,ebit:32,esg:68},
+  {name:'EOG Resources',hq:'USA',region:'Americas',cap:72,capLbl:'$72B',trs:5,roic:19.4,ebit:38,esg:61},
+  {name:'AkerBP',hq:'Norway',region:'Europe',cap:14,capLbl:'$14B',trs:-3,roic:11.2,ebit:24,esg:79},
+  {name:'Inpex',hq:'Japan',region:'Asia-Pacific',cap:12,capLbl:'$12B',trs:9,roic:10.8,ebit:22,esg:74},
+  {name:'Woodside',hq:'Australia',region:'Asia-Pacific',cap:32,capLbl:'$32B',trs:4,roic:13.5,ebit:27,esg:71},
+  {name:'Canadian Natural',hq:'Canada',region:'Americas',cap:55,capLbl:'$55B',trs:15,roic:17.8,ebit:35,esg:58},
+  {name:'Pioneer NR',hq:'USA',region:'Americas',cap:54,capLbl:'$54B',trs:6,roic:15.9,ebit:31,esg:63},
+  {name:'Devon Energy',hq:'USA',region:'Americas',cap:26,capLbl:'$26B',trs:-1,roic:12.7,ebit:26,esg:60},
+  {name:'Ovintiv',hq:'Canada',region:'Americas',cap:11,capLbl:'$11B',trs:3,roic:10.1,ebit:19,esg:57},
+  {name:'Southwestern',hq:'USA',region:'Americas',cap:7,capLbl:'$7B',trs:-8,roic:7.4,ebit:14,esg:52},
+];
+let peerSort={col:'trs',asc:false};
+
+const UCS=[
+  {uc:'Predictive Maintenance',dept:'Operations',type:'Core',lo:120,base:150,hi:180,pri:'High'},
+  {uc:'Intelligent Procurement',dept:'Supply Chain',type:'Core',lo:100,base:125,hi:145,pri:'High'},
+  {uc:'Seismic AI Interpretation',dept:'Exploration',type:'Core',lo:160,base:185,hi:210,pri:'High'},
+  {uc:'Finance Process Automation',dept:'Finance',type:'Core',lo:70,base:82,hi:95,pri:'Medium'},
+  {uc:'HSE Digital Compliance',dept:'HSE',type:'Add-On',lo:50,base:61,hi:72,pri:'Medium'},
+  {uc:'Workforce Planning Analytics',dept:'HR',type:'Add-On',lo:30,base:38,hi:45,pri:'Low'},
+  {uc:'Well Performance Optimisation',dept:'Drilling',type:'Core',lo:120,base:142,hi:165,pri:'High'},
+  {uc:'Inventory Optimisation',dept:'Supply Chain',type:'Add-On',lo:60,base:74,hi:88,pri:'Medium'},
+  {uc:'Energy Management System',dept:'Operations',type:'Add-On',lo:45,base:55,hi:68,pri:'Medium'},
+  {uc:'Digital Twin — Offshore',dept:'Drilling',type:'Core',lo:90,base:110,hi:130,pri:'High'},
+  {uc:'Real-time Production Dashboard',dept:'Operations',type:'Core',lo:55,base:68,hi:82,pri:'Medium'},
+  {uc:'Vendor Risk Analytics',dept:'Supply Chain',type:'Add-On',lo:25,base:31,hi:38,pri:'Low'},
+  {uc:'Auto-Dunning (Finance)',dept:'Finance',type:'Core',lo:20,base:25,hi:30,pri:'Low'},
+  {uc:'Automate Vendor Invoice Processing',dept:'Finance',type:'Core',lo:35,base:42,hi:50,pri:'Medium'},
+];
+
+const KPIS=[
+  {kpi:'Procurement Cycle Time',fn:'Finance',sub:'P2P',pttep:12,industry:8,unit:'days',hw:true},
+  {kpi:'Unplanned Downtime Rate',fn:'Operations',sub:'Asset Mgmt',pttep:4.2,industry:3.1,unit:'%',hw:true},
+  {kpi:'Inventory Turnover',fn:'Supply Chain',sub:'Inventory',pttep:5.8,industry:7.2,unit:'x',hw:false},
+  {kpi:'Seismic Processing Time',fn:'Exploration',sub:'Data Mgmt',pttep:21,industry:14,unit:'days',hw:true},
+  {kpi:'HSE Incident Rate',fn:'HSE',sub:'Safety',pttep:0.38,industry:0.29,unit:'/200k hrs',hw:true},
+  {kpi:'IT Ticket Resolution',fn:'IT',sub:'Service Desk',pttep:48,industry:36,unit:'hrs',hw:true},
+  {kpi:'G&A as % Revenue',fn:'Finance',sub:'Cost Control',pttep:8.4,industry:6.2,unit:'%',hw:true},
+  {kpi:'Well Cost per BOE',fn:'Operations',sub:'Drilling',pttep:18,industry:15,unit:'$',hw:true},
+];
+
+const IMPRS=[
+  {title:'Predictive Maintenance Program',dept:'Operations',desc:'Deploy IoT sensor networks and ML models to shift from reactive to predictive maintenance, targeting 35% reduction in unplanned downtime.',impact:9,effort:6,val:'$180M',quick:false,col:'#00c9a7'},
+  {title:'AI-Powered Seismic Interpretation',dept:'Exploration',desc:'Use deep learning to accelerate seismic data interpretation from 21 to 8 days, improving prospect identification accuracy by ~25%.',impact:9,effort:7,val:'$210M',quick:false,col:'#4a7fe0'},
+  {title:'Automated Invoice Processing',dept:'Finance',desc:'RPA + AI to automate vendor invoice matching, reducing processing time by 80% and eliminating manual exceptions.',impact:6,effort:3,val:'$42M',quick:true,col:'#f5a623'},
+  {title:'Inventory Optimisation Engine',dept:'Supply Chain',desc:'ML demand forecasting to reduce excess inventory 30%, freeing working capital and cutting storage costs.',impact:7,effort:5,val:'$74M',quick:true,col:'#f5a623'},
+  {title:'Real-time Production Dashboard',dept:'Operations',desc:'Unified operational dashboard integrating field data, reducing reporting lag from 24hrs to real-time.',impact:5,effort:2,val:'$68M',quick:true,col:'#00c9a7'},
+  {title:'Digital HSE Compliance',dept:'HSE',desc:'Replace paper-based compliance logs with digital tracking, reducing audit prep time by 60% and regulatory risk.',impact:5,effort:3,val:'$61M',quick:true,col:'#a77de0'},
+  {title:'Intelligent Procurement',dept:'Supply Chain',desc:'AI-powered sourcing recommendations, reducing procurement cycle from 12 to 6 days and capturing 4% cost savings.',impact:8,effort:6,val:'$145M',quick:false,col:'#4a7fe0'},
+  {title:'Well Performance Optimisation',dept:'Drilling',desc:'Real-time wellbore analytics to optimise drilling parameters, reducing well cost per BOE by 17%.',impact:8,effort:7,val:'$165M',quick:false,col:'#e05c5c'},
+];
+
+/* ========= CHART REGISTRY ========= */
+const CHS={};
+let inited=false;
+function mk(id,cfg){if(CHS[id]){CHS[id].destroy()}CHS[id]=new Chart(document.getElementById(id),cfg);return CHS[id];}
+const C={teal:'#00c9a7',gold:'#f5a623',blue:'#4a7fe0',red:'#e05c5c',purple:'#8a5cf0',txt2:'#8eaac8'};
+const grid={color:'rgba(255,255,255,0.06)'};
+const tickOpts={color:C.txt2,font:{size:10}};
+
+/* ========= INIT ========= */
+function init(){
+  inited=true;
+  buildIntro();buildComp();buildOutside();buildChal();buildKPI();buildOpp();buildFin();buildIce();buildESG();buildVR();buildImpr();
+}
+
+/* ===== INTRO ===== */
+function buildIntro(){
+  const areas=[{l:'Intelligent Sourcing',s:'Supply chain & procurement',c:'#00c9a7'},{l:'IT & Back Office',s:'Cost & productivity reinvention',c:'#f5a623'},{l:'Operations Excellence',s:'Field & asset optimisation',c:'#4a7fe0'},{l:'Digital Exploration',s:'Data-driven subsurface insights',c:'#e05c5c'}];
+  const el=document.getElementById('mega-areas');
+  areas.forEach(a=>{el.innerHTML+=`<div style="display:flex;align-items:center;gap:9px;padding:9px;background:rgba(255,255,255,.04);border-radius:8px;margin-bottom:7px;border-left:3px solid ${a.c}"><div style="width:7px;height:7px;border-radius:50%;background:${a.c};flex-shrink:0"></div><div><div style="font-size:12px;font-weight:600;color:var(--txt)">${a.l}</div><div style="font-size:10px;color:var(--txt3)">${a.s}</div></div></div>`;});
+  mk('c-donut',{type:'doughnut',data:{labels:['Exploration','Drilling','Operations','HSE','Supply Chain','Finance','IT','HR'],datasets:[{data:[420,380,310,290,250,220,180,150],backgroundColor:['#00c9a7','#00a388','#4a7fe0','#2a5fd0','#f5a623','#d48a00','#e05c5c','#b83c3c'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'66%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' $'+ctx.parsed+'M'}}}}});
+}
+
+/* ===== COMPETITORS ===== */
+let peerSortDir={trs:-1,roic:-1};
+function sortPeers(col){peerSortDir[col]*=-1;filterPeers(col);}
+function filterPeers(sortCol){
+  const srch=document.getElementById('peer-srch').value.toLowerCase();
+  const hq=document.getElementById('peer-hq').value;
+  let data=[...PEERS];
+  if(srch)data=data.filter(p=>p.name.toLowerCase().includes(srch)||p.hq.toLowerCase().includes(srch));
+  if(hq)data=data.filter(p=>p.region===hq);
+  const sc=sortCol||peerSort.col;
+  data.sort((a,b)=>(peerSortDir[sc]||1)*(b[sc]-a[sc]));
+  const tb=document.getElementById('peer-body');tb.innerHTML='';
+  data.forEach(p=>{
+    const up=p.trs>=0;
+    tb.innerHTML+=`<tr${p.you?' style="background:rgba(0,201,167,.06)"':''}>
+      <td style="font-weight:600">${p.name}${p.you?'<span class="bdg hi" style="margin-left:6px">YOU</span>':''}</td>
+      <td style="color:var(--txt2)">${p.hq}</td><td><span class="bdg gr">${p.region}</span></td>
+      <td style="font-weight:600">${p.capLbl}</td>
+      <td style="${up?'color:#00c9a7':'color:#e05c5c'};font-weight:600">${up?'+':''}${p.trs}%</td>
+      <td style="font-weight:600">${p.roic}%</td><td>${p.ebit}%</td><td>${p.esg}</td></tr>`;
+  });
+  // scatter
+  mk('c-scatter',{type:'bubble',data:{datasets:[{label:'Peers',data:PEERS.filter(p=>!p.you).map(p=>({x:p.trs,y:p.roic,r:Math.sqrt(p.cap)*1.1,name:p.name})),backgroundColor:'rgba(74,127,224,0.55)',borderColor:'rgba(74,127,224,0.9)',borderWidth:1},{label:'PTTEP',data:PEERS.filter(p=>p.you).map(p=>({x:p.trs,y:p.roic,r:Math.sqrt(p.cap)*1.1,name:p.name})),backgroundColor:'rgba(0,201,167,0.7)',borderColor:'#00c9a7',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:C.txt2,font:{size:10},boxWidth:10}},tooltip:{callbacks:{label:ctx=>`${ctx.raw.name}: TRS ${ctx.raw.x}%, ROIC ${ctx.raw.y}%`}}},scales:{x:{title:{display:true,text:'1Y TRS (%)',color:C.txt2,font:{size:10}},ticks:tickOpts,grid},y:{title:{display:true,text:'ROIC (%)',color:C.txt2,font:{size:10}},ticks:tickOpts,grid}}}});
+}
+function buildComp(){filterPeers();}
+
+/* ===== OUTSIDE-IN ===== */
+let selCo='PTTEP';
+const CO_DATA={
+  PTTEP:{fin:[{l:'1Y TRS',s:68,r:6},{l:'Rev Growth',s:55,r:8},{l:'ROIC',s:82,r:3},{l:'EBIT Margin',s:74,r:5},{l:'Capital Eff.',s:62,r:7}],esg:[{l:'Environmental',s:72,r:4},{l:'Social',s:65,r:7},{l:'Governance',s:78,r:3}],radar:[68,55,82,74,62,72]},
+  ConocoPhillips:{fin:[{l:'1Y TRS',s:60,r:8},{l:'Rev Growth',s:70,r:4},{l:'ROIC',s:90,r:1},{l:'EBIT Margin',s:85,r:2},{l:'Capital Eff.',s:78,r:3}],esg:[{l:'Environmental',s:68,r:5},{l:'Social',s:62,r:9},{l:'Governance',s:70,r:6}],radar:[60,70,90,85,78,68]},
+  AkerBP:{fin:[{l:'1Y TRS',s:40,r:12},{l:'Rev Growth',s:55,r:9},{l:'ROIC',s:65,r:8},{l:'EBIT Margin',s:60,r:10},{l:'Capital Eff.',s:68,r:6}],esg:[{l:'Environmental',s:79,r:2},{l:'Social',s:75,r:3},{l:'Governance',s:82,r:1}],radar:[40,55,65,60,68,79]},
+  Inpex:{fin:[{l:'1Y TRS',s:65,r:7},{l:'Rev Growth',s:50,r:11},{l:'ROIC',s:60,r:9},{l:'EBIT Margin',s:58,r:11},{l:'Capital Eff.',s:52,r:12}],esg:[{l:'Environmental',s:74,r:3},{l:'Social',s:70,r:4},{l:'Governance',s:68,r:7}],radar:[65,50,60,58,52,74]},
+};
+function buildOutside(){
+  const el=document.getElementById('co-sel');
+  Object.keys(CO_DATA).forEach(co=>{
+    const chip=document.createElement('div');chip.className='co-chip'+(co==='PTTEP'?' on':'');chip.innerHTML=`<span class="dot"></span>${co}`;
+    chip.onclick=()=>{document.querySelectorAll('.co-chip').forEach(c=>c.classList.remove('on'));chip.classList.add('on');selCo=co;updateOutside();};
+    el.appendChild(chip);
+  });
+  updateOutside();
+}
+function updateOutside(){
+  const d=CO_DATA[selCo]||CO_DATA['PTTEP'];
+  renderGauges('fin-g',d.fin);renderGauges('esg-g',d.esg);
+  mk('c-radar',{type:'radar',data:{labels:['TRS','Revenue Growth','ROIC','EBIT Margin','Capital Efficiency','ESG Score'],datasets:[
+    {label:selCo,data:d.radar,borderColor:C.teal,backgroundColor:'rgba(0,201,167,.12)',pointBackgroundColor:C.teal,borderWidth:2},
+    {label:'Industry Avg',data:[60,65,68,70,70,64],borderColor:C.blue,backgroundColor:'rgba(74,127,224,.08)',pointBackgroundColor:C.blue,borderWidth:2,borderDash:[5,4]},
+  ]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{ticks:{color:'rgba(142,170,200,.6)',font:{size:9},backdropColor:'transparent'},grid:{color:'rgba(255,255,255,.07)'},angleLines:{color:'rgba(255,255,255,.07)'},pointLabels:{color:C.txt2,font:{size:11}}}},plugins:{legend:{labels:{color:C.txt2,font:{size:11},boxWidth:10}}}}});
+}
+function renderGauges(id,items){
+  const el=document.getElementById(id);el.innerHTML='';
+  items.forEach(g=>{
+    const r=32,circ=2*Math.PI*r,pct=g.s/100;
+    const col=g.s>=70?C.teal:g.s>=50?C.gold:C.red;
+    el.innerHTML+=`<div class="gc"><div class="gw"><svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="${r}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="7"/><circle cx="40" cy="40" r="${r}" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${circ*pct} ${circ*(1-pct)}" transform="rotate(-90 40 40)"/></svg><div class="gctr" style="color:${col}">${g.s}</div></div><div class="gl">${g.l}</div><div class="gr2" style="color:${col}">Rank ${g.r}/15</div></div>`;
+  });
+}
+
+/* ===== CHALLENGES ===== */
+const WORDS=[
+  {w:'Data Silos',sz:17,col:'#00a388',dept:'IT'},{w:'Manual Processes',sz:22,col:'#d48a00',dept:'Finance'},
+  {w:'Forecast Accuracy',sz:15,col:'#7a5dd0',dept:'Finance'},{w:'HSE Compliance',sz:20,col:'#2a8a6a',dept:'HSE'},
+  {w:'Asset Reliability',sz:24,col:'#c04040',dept:'Plant Maintenance'},{w:'Cost Overruns',sz:18,col:'#8a7000',dept:'Finance'},
+  {w:'Talent Gaps',sz:13,col:'#2a6aaa',dept:'Engineering & Development'},{w:'Regulatory Burden',sz:16,col:'#5a7a2a',dept:'HSE'},
+  {w:'Inventory Control',sz:14,col:'#7a2a7a',dept:'Supply Chain'},{w:'Unplanned Downtime',sz:21,col:'#007a9a',dept:'Plant Maintenance'},
+  {w:'Report Delays',sz:12,col:'#9a5a2a',dept:'Finance'},{w:'Integration Issues',sz:18,col:'#3a2a9a',dept:'IT'},
+];
+const CARDS=[
+  {title:'Process Automation',desc:'Manual workflows reduce throughput in finance and back-office',dept:'Finance',pri:'High'},
+  {title:'Predictive Maintenance',desc:'Reactive culture causing unplanned equipment stoppages',dept:'Plant Maintenance',pri:'High'},
+  {title:'Inventory Optimisation',desc:'Excess parts inventory 30% above target',dept:'Supply Chain',pri:'Medium'},
+  {title:'HSE Digital Tracking',desc:'Paper-based compliance logs increase regulatory exposure',dept:'HSE',pri:'High'},
+  {title:'Data Integration',desc:'Siloed systems prevent enterprise data visibility',dept:'IT',pri:'Medium'},
+  {title:'Talent Upskilling',desc:'Digital and analytics skill gaps across units',dept:'Engineering & Development',pri:'Low'},
+];
+let activeWord=null;
+function filterChal(){
+  const dept=document.getElementById('dept-dd').value;
+  // word cloud
+  const wc=document.getElementById('wc');wc.innerHTML='';
+  WORDS.filter(w=>!dept||w.dept===dept).forEach(w=>{
+    const span=document.createElement('span');span.className='wt'+(activeWord===w.w?' sel':'');
+    span.style.cssText=`font-size:${w.sz}px;color:${w.col};background:${w.col}18;border-color:${w.col}33`;
+    span.textContent=w.w;
+    span.onclick=()=>{activeWord=activeWord===w.w?null:w.w;filterChal();};
+    wc.appendChild(span);
+  });
+  // cards
+  const cc=document.getElementById('chal-cards');cc.innerHTML='';
+  const shown=CARDS.filter(c=>(!dept||c.dept===dept)&&(!activeWord||c.title.toLowerCase().includes(activeWord.toLowerCase())||c.desc.toLowerCase().includes(activeWord.toLowerCase())));
+  document.getElementById('chal-count').textContent=`Showing ${shown.length} of ${CARDS.length}`;
+  const cls={High:'hi',Medium:'med',Low:'lo'};
+  shown.forEach(c=>{cc.innerHTML+=`<div class="ic"><div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px"><span class="ic-t">${c.title}</span><span class="bdg ${cls[c.pri]}">${c.pri}</span></div><div class="ic-d">${c.desc}</div><div style="margin-top:8px;font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;font-weight:600">${c.dept}</div></div>`;});
+}
+function buildChal(){
+  // dept bars
+  const depts=[{dept:'Operations',n:12,col:C.teal},{dept:'Finance',n:9,col:C.gold},{dept:'Supply Chain',n:8,col:C.blue},{dept:'HSE',n:7,col:C.red},{dept:'Exploration',n:6,col:C.purple}];
+  const db=document.getElementById('dept-bars');
+  depts.forEach(d=>{db.innerHTML+=`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:12px;font-weight:600;color:var(--txt)">${d.dept}</span><span style="font-size:11px;color:var(--txt3)">${d.n} issues</span></div><div style="background:rgba(255,255,255,.07);border-radius:4px;height:10px"><div style="height:100%;width:${(d.n/12)*100}%;background:${d.col};border-radius:4px;transition:width .5s ease"></div></div></div>`;});
+  filterChal();
+}
+
+/* ===== KPI ===== */
+function buildKPI(){
+  // populate sub-process dd
+  const subs=[...new Set(KPIS.map(k=>k.sub))];
+  const sdd=document.getElementById('subproc-dd');
+  subs.forEach(s=>{sdd.innerHTML+=`<option>${s}</option>`;});
+  renderBullets();
+}
+function renderBullets(){
+  const fn=document.getElementById('proc-dd').value;
+  const sub=document.getElementById('subproc-dd').value;
+  let data=KPIS;
+  if(fn)data=data.filter(k=>k.fn===fn);
+  if(sub)data=data.filter(k=>k.sub===sub);
+  const grid=document.getElementById('bullet-grid');grid.innerHTML='';
+  data.forEach(k=>{
+    const max=Math.max(k.pttep,k.industry)*1.35;
+    const pp=(k.pttep/max)*100,ip=(k.industry/max)*100;
+    const worse=k.hw?k.pttep>k.industry:k.pttep<k.industry;
+    const col=worse?C.red:C.teal;
+    grid.innerHTML+=`<div class="bi" style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px">
+      <div class="bm"><span class="bn">${k.kpi}</span><span class="bf">${k.fn} · ${k.sub}</span></div>
+      <div class="bt"><div class="bfill" style="width:${pp}%;background:${col}"></div><div class="btgt" style="left:${ip}%"></div></div>
+      <div class="bv"><span style="color:${col};font-weight:600">PTTEP: ${k.pttep} ${k.unit}</span><span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:2px;background:rgba(255,255,255,.6);display:inline-block"></span>Industry: ${k.industry}</span></div>
+    </div>`;
+  });
+}
+
+/* ===== OPPORTUNITIES ===== */
+let curCase='hi';
+const DEPTS=['Exploration','Drilling','Operations','HSE','Supply Chain','Finance','IT','HR'];
+const DEPT_VALS={hi:[420,380,310,290,250,220,180,150],med:[310,280,240,210,185,160,130,110],lo:[200,180,160,140,120,100,85,70]};
+const DEPT_COLS=['#00c9a7','#00a388','#4a7fe0','#2a5fd0','#f5a623','#d48a00','#e05c5c','#b83c3c'];
+function setCase(c){
+  curCase=c;
+  ['hi','med','lo'].forEach(x=>{document.getElementById('case-'+x).classList.toggle('on',x===c);});
+  document.getElementById('opp-case-lbl').textContent={hi:'High Case',med:'Median Case',lo:'Low Case'}[c]+' · $M';
+  document.getElementById('case-pill').textContent={hi:'High Case',med:'Median Case',lo:'Low Case'}[c];
+  mk('c-opp',oppCfg(c));
+}
+function oppCfg(c){
+  return{type:'bar',data:{labels:DEPTS,datasets:[{label:'Value ($M)',data:DEPT_VALS[c],backgroundColor:DEPT_COLS,borderWidth:0,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' $'+ctx.parsed.y+'M'}}},scales:{y:{ticks:{callback:v=>'$'+v+'M',...tickOpts},grid},x:{ticks:tickOpts,grid:{display:false}}}}};
+}
+function renderUC(){
+  const dept=document.getElementById('uc-dept').value;
+  const type=document.getElementById('uc-type').value;
+  const pri=document.getElementById('uc-pri').value;
+  const srch=document.getElementById('uc-srch').value.toLowerCase();
+  const shown=UCS.filter(u=>(!dept||u.dept===dept)&&(!type||u.type===type)&&(!pri||u.pri===pri)&&(!srch||u.uc.toLowerCase().includes(srch)));
+  const tb=document.getElementById('uc-body');tb.innerHTML='';
+  const cls={High:'hi',Medium:'med',Low:'lo'};
+  shown.forEach(u=>{
+    const q=srch?u.uc.replace(new RegExp(srch,'gi'),m=>`<span class="hl">${m}</span>`):u.uc;
+    tb.innerHTML+=`<tr><td style="font-weight:500">${q}</td><td>${u.dept}</td><td><span class="bdg gr">${u.type}</span></td><td style="color:var(--txt2)">$${u.lo}M</td><td style="font-weight:600">$${u.base}M</td><td style="color:#00c9a7;font-weight:600">$${u.hi}M</td><td><span class="bdg ${cls[u.pri]}">${u.pri}</span></td></tr>`;
+  });
+  document.getElementById('uc-count').textContent=`Showing ${shown.length} of ${UCS.length} use cases`;
+}
+function buildOpp(){mk('c-opp',oppCfg('hi'));renderUC();}
+
+/* ===== NET FINANCIALS ===== */
+const SAV_DATA={All:{depts:['Operations','Supply Chain','Finance','HSE','IT'],vals:[320,195,148,115,112],cols:[C.teal,C.blue,C.gold,C.red,C.purple]},Core:{depts:['Operations','Supply Chain','Finance'],vals:[250,150,100],cols:[C.teal,C.blue,C.gold]},'Add-On':{depts:['HSE','IT','Supply Chain'],vals:[80,70,65],cols:[C.red,C.purple,C.blue]}};
+function rebuildScenChart(){
+  const t=document.getElementById('fin-type').value;
+  const d=SAV_DATA[t||'All'];
+  mk('c-scen',{type:'bar',data:{labels:d.depts,datasets:[
+    {label:'Conservative',data:d.vals.map(v=>Math.round(v*.65)),backgroundColor:'rgba(74,127,224,.55)',borderRadius:3},
+    {label:'Base',data:d.vals,backgroundColor:'rgba(0,195,150,.65)',borderRadius:3},
+    {label:'High Case',data:d.vals.map(v=>Math.round(v*1.3)),backgroundColor:'rgba(245,166,35,.65)',borderRadius:3},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:C.txt2,font:{size:10},boxWidth:10}}},scales:{x:{ticks:tickOpts,grid:{display:false}},y:{ticks:{callback:v=>'$'+v+'M',...tickOpts},grid}}}});
+}
+function buildFin(){
+  const sav=[{l:'Operations',v:320,c:C.teal},{l:'Supply Chain',v:195,c:C.blue},{l:'Finance',v:148,c:C.gold},{l:'HSE',v:115,c:C.red},{l:'IT',v:112,c:C.purple}];
+  const wf=document.getElementById('sav-wf');
+  sav.forEach(s=>{wf.innerHTML+=`<div class="wfr"><div class="wfl">${s.l}</div><div class="wftr"><div class="wff" style="width:${(s.v/320)*100}%;background:${s.c}">$${s.v}M</div></div></div>`;});
+  mk('c-sav',{type:'line',data:{labels:['Y1','Y2','Y3','Y4','Y5'],datasets:[
+    {label:'Cumulative ($M)',data:[95,280,490,680,890],borderColor:C.teal,backgroundColor:'rgba(0,201,167,.08)',fill:true,tension:.4,pointBackgroundColor:C.teal,pointRadius:5},
+    {label:'Target ($M)',data:[100,250,470,700,920],borderColor:C.gold,backgroundColor:'transparent',tension:.4,borderDash:[6,4],pointBackgroundColor:C.gold,pointRadius:4},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:C.txt2,font:{size:10},boxWidth:10}}},scales:{y:{ticks:{callback:v=>'$'+v+'M',...tickOpts},grid},x:{ticks:tickOpts,grid:{display:false}}}}});
+  rebuildScenChart();
+}
+
+/* ===== ICEBERG ===== */
+let iceMode='stacked';
+const ICE_D={labels:['Finance','Operations','Supply Chain','HSE','IT','Exploration'],driven:[85,120,65,45,58,95],enabled:[120,185,110,80,95,140]};
+function setIceMode(m,btn){iceMode=m;document.querySelectorAll('#ice-stacked,#ice-grouped').forEach(b=>b.classList.remove('on'));btn.classList.add('on');buildIceCfg();}
+function buildIceCfg(){
+  mk('c-ice',{type:'bar',data:{labels:ICE_D.labels,datasets:[
+    {label:'AI Driven',data:ICE_D.driven,backgroundColor:'rgba(0,201,167,.7)',borderRadius:4},
+    {label:'AI Enabled',data:ICE_D.enabled,backgroundColor:'rgba(74,127,224,.7)',borderRadius:4},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:C.txt2,font:{size:11},boxWidth:10}}},scales:{x:{stacked:iceMode==='stacked',ticks:tickOpts,grid:{display:false}},y:{stacked:iceMode==='stacked',ticks:{callback:v=>'$'+v+'M',...tickOpts},grid}}}});
+}
+function buildIce(){buildIceCfg();}
+
+/* ===== ESG ===== */
+function fillBars(id,items,col){const el=document.getElementById(id);items.forEach(i=>{el.innerHTML+=`<div class="er"><span class="en">${i.l}</span><div class="et"><div class="ef" style="width:${i.v}%;background:${col}"></div></div><span class="ev">${i.v}</span></div>`;});}
+function buildESG(){
+  fillBars('env-b',[{l:'Env. Stewardship',v:75},{l:'Environmental Solutions',v:68},{l:'Resource Use',v:73}],'#4caf7d');
+  fillBars('soc-b',[{l:'Stakeholder Relations',v:62},{l:'Employment Quality',v:70},{l:'Product Quality & Safety',v:63}],'#5b8ef0');
+  fillBars('gov-b',[{l:'Transparency',v:80},{l:'Business Ethics',v:77},{l:'Competitive Behavior',v:76}],'#a77de0');
+  mk('c-esg',{type:'bar',data:{labels:['Environmental','Social','Governance'],datasets:[
+    {label:'PTTEP',data:[72,65,78],backgroundColor:['rgba(76,175,125,.7)','rgba(91,142,240,.7)','rgba(167,125,224,.7)'],borderRadius:5},
+    {label:'Industry Avg',data:[61,58,64],backgroundColor:['rgba(76,175,125,.25)','rgba(91,142,240,.25)','rgba(167,125,224,.25)'],borderRadius:5},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:C.txt2,font:{size:11},boxWidth:10}}},scales:{x:{ticks:tickOpts,grid:{display:false}},y:{min:0,max:100,ticks:tickOpts,grid}}}});
+}
+
+/* ===== VALUE REALIZATION ===== */
+const SL_DEFS=[
+  {id:'sl_a',l:'Adoption Rate (%)',min:30,max:100,base:70,hi:90,lo:50,u:'%'},
+  {id:'sl_s',l:'Delivery Speed (months)',min:12,max:60,base:36,hi:24,lo:48,u:'mo'},
+  {id:'sl_c',l:'Implementation Cost ($M)',min:100,max:500,base:280,hi:240,lo:350,u:'M'},
+  {id:'sl_r',l:'Revenue Uplift Captured (%)',min:20,max:100,base:65,hi:85,lo:45,u:'%'},
+];
+let SV={};
+function calcNPV(){return Math.round((2400*(SV.sl_a/100)*(SV.sl_r/100)*(1+(60-SV.sl_s)/60*.3)-SV.sl_c)/1.1);}
+function setScen(s){
+  ['base','hi','lo'].forEach(x=>document.getElementById('scen-'+x).classList.toggle('on',x===s));
+  SL_DEFS.forEach(d=>{SV[d.id]=d[s];document.getElementById(d.id).value=d[s];document.getElementById(d.id+'o').textContent=d[s]+d.u;});
+  const npv=Math.max(0,calcNPV());
+  document.getElementById('npv-val').textContent='$'+npv.toLocaleString()+'M';
+  document.getElementById('npv-sub').textContent='Discounted at 10% · '+{base:'Base Case',hi:'High Case',lo:'Conservative'}[s];
+}
+function buildVR(){
+  const se=document.getElementById('sliders');
+  SL_DEFS.forEach(d=>{
+    SV[d.id]=d.base;
+    se.innerHTML+=`<div class="sl-row"><span class="sl-lbl">${d.l}</span><input type="range" class="sl-inp" id="${d.id}" min="${d.min}" max="${d.max}" value="${d.base}" step="1" oninput="SV['${d.id}']=+this.value;document.getElementById('${d.id}o').textContent=this.value+'${d.u}';const v=Math.max(0,calcNPV());document.getElementById('npv-val').textContent='$'+v.toLocaleString()+'M';document.getElementById('npv-sub').textContent='Discounted at 10% · Custom'"><span class="sl-val" id="${d.id}o">${d.base}${d.u}</span></div>`;
+  });
+  mk('c-vrp',{type:'bar',data:{labels:['Wave 1\nQuick Wins','Wave 2\nCore','Wave 3\nAdvanced','Wave 4\nTransform'],datasets:[
+    {label:'Realized',data:[220,280,130,42],backgroundColor:'rgba(0,201,167,.75)',borderRadius:5},
+    {label:'In Progress',data:[60,180,260,200],backgroundColor:'rgba(74,127,224,.5)',borderRadius:5},
+    {label:'Planned',data:[0,50,320,580],backgroundColor:'rgba(255,255,255,.1)',borderRadius:5},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:C.txt2,font:{size:10},boxWidth:10}}},scales:{x:{stacked:true,ticks:tickOpts,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>'$'+v+'M',...tickOpts},grid}}}});
+  // timeline
+  const phases=[
+    {l:'Intelligent Sourcing',st:0,dur:40,col:C.teal},{l:'Predictive Maintenance',st:15,dur:45,col:C.gold},
+    {l:'Finance Automation',st:10,dur:30,col:C.blue},{l:'HSE Digital',st:25,dur:35,col:C.red},
+    {l:'Seismic AI',st:30,dur:50,col:C.purple},{l:'Well Optimisation',st:40,dur:40,col:'#00a388'},
+  ];
+  const tw=document.getElementById('tl-wrap');
+  tw.innerHTML=`<div style="display:flex;margin-bottom:6px;margin-left:155px"><div style="flex:1;display:flex;justify-content:space-between;font-size:10px;color:var(--txt3)">${['2024','2025','2026','2027','2028'].map(y=>`<span>${y}</span>`).join('')}</div></div>`;
+  phases.forEach(p=>{tw.innerHTML+=`<div class="tl-row"><div class="tl-lbl">${p.l}</div><div class="tl-track"><div class="tl-bar" style="left:${p.st}%;width:${p.dur}%;background:${p.col}"></div></div></div>`;});
+  // roadmap
+  const rm=[
+    {y:'2024',c:C.teal,items:['Launch intelligent sourcing pilot','Deploy finance automation MVP','Establish AI data foundation','Quick win use cases go-live']},
+    {y:'2025',c:C.gold,items:['Predictive maintenance at scale','HSE digital compliance live','Seismic AI interpretation Ph.1','Wave 1 value: $280M captured']},
+    {y:'2026',c:C.blue,items:['Well optimisation platform','Digital twin offshore pilot','Advanced analytics centre','Wave 2 value: $460M captured']},
+    {y:'2027',c:C.purple,items:['Full AI enablement','AI-driven exploration','Enterprise-wide integration','Wave 3 value: $390M captured']},
+  ];
+  const rg=document.getElementById('rm-grid');
+  rm.forEach(r=>{rg.innerHTML+=`<div class="rm-c" style="border-top:2px solid ${r.c}"><div class="rm-y" style="color:${r.c}">${r.y}</div>${r.items.map(i=>`<div class="rm-i"><div class="rm-d" style="background:${r.c}"></div>${i}</div>`).join('')}</div>`;});
+}
+
+/* ===== IMPROVEMENTS ===== */
+function renderImprovements(){
+  const sort=document.getElementById('impr-sort').value;
+  const dept=document.getElementById('impr-dept').value;
+  let data=[...IMPRS];
+  if(dept)data=data.filter(i=>i.dept===dept);
+  if(sort==='impact')data.sort((a,b)=>b.impact-a.impact);
+  else if(sort==='effort')data.sort((a,b)=>a.effort-b.effort);
+  else data.sort((a,b)=>a.dept.localeCompare(b.dept));
+  const el=document.getElementById('impr-list');el.innerHTML='';
+  data.forEach(i=>{
+    el.innerHTML+=`<div class="impr-row" style="border-color:${i.col}">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+          <strong style="font-size:12px;font-weight:700;color:var(--txt)">${i.title}</strong>
+          <span style="display:flex;align-items:center;gap:6px">
+            ${i.quick?'<span class="bdg hi">Quick Win</span>':''}
+            <span class="bdg bl">${i.dept}</span>
+            <span style="font-size:11px;font-weight:700;color:#00c9a7">${i.val}</span>
+          </span>
+        </div>
+        <div style="font-size:11px;color:var(--txt3)">${i.desc}</div>
+        <div style="display:flex;gap:16px;margin-top:6px;font-size:10px;color:var(--txt3)">
+          <span>Impact: <strong style="color:var(--txt)">${i.impact}/10</strong></span>
+          <span>Effort: <strong style="color:var(--txt)">${i.effort}/10</strong></span>
+        </div>
+      </div>
+    </div>`;
+  });
+  // matrix chart
+  mk('c-matrix',{type:'bubble',data:{datasets:[
+    {label:'Quick Win',data:IMPRS.filter(i=>i.quick).map(i=>({x:i.effort,y:i.impact,r:8,name:i.title})),backgroundColor:'rgba(0,201,167,.65)',borderColor:C.teal,borderWidth:1.5},
+    {label:'Strategic',data:IMPRS.filter(i=>!i.quick).map(i=>({x:i.effort,y:i.impact,r:8,name:i.title})),backgroundColor:'rgba(74,127,224,.65)',borderColor:C.blue,borderWidth:1.5},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:C.txt2,font:{size:10},boxWidth:10}},tooltip:{callbacks:{label:ctx=>`${ctx.raw.name}`}}},scales:{x:{title:{display:true,text:'Effort (1=Low, 10=High)',color:C.txt2,font:{size:10}},min:0,max:11,ticks:tickOpts,grid},y:{title:{display:true,text:'Impact (1=Low, 10=High)',color:C.txt2,font:{size:10}},min:0,max:11,ticks:tickOpts,grid}}}});
+}
+function buildImpr(){
+  renderImprovements();
+  // AI Readiness chart
+  mk('c-ready',{type:'bar',data:{
+    labels:['Exploration','Operations','Finance','Supply Chain','HSE','Drilling','IT'],
+    datasets:[
+      {label:'Data Availability',data:[72,65,80,60,55,58,85],backgroundColor:'rgba(0,201,167,.6)',borderRadius:3},
+      {label:'Process Maturity',data:[58,70,75,65,68,52,80],backgroundColor:'rgba(74,127,224,.6)',borderRadius:3},
+      {label:'Tech Stack',data:[65,60,70,55,50,48,90],backgroundColor:'rgba(138,92,240,.6)',borderRadius:3},
+    ]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:C.txt2,font:{size:10},boxWidth:10}}},scales:{x:{ticks:tickOpts,grid:{display:false}},y:{min:0,max:100,ticks:{callback:v=>v+'%',...tickOpts},grid}}}});
+}
+</script>
+</body>
+</html>
